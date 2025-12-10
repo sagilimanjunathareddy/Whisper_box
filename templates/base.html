@@ -1,0 +1,32 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Women Safety Whisper Box</title>
+  <link rel="stylesheet" href="{% static 'stories/styles.css' %}">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><a href="/">Women Safety Whisper Box</a></h1>
+      <nav>
+        <a href="/stories/">Stories</a> |
+        <a href="/heatmap/">Heatmap</a> |
+        <a href="/dashboard/">Admin</a>
+        
+        
+      </nav>
+      <hr>
+    </header>
+
+    {% block content %}{% endblock %}
+
+    <footer>
+      <hr>
+      <p>&copy; 2025 Whisper Box</p>
+    </footer>
+  </div>
+</body>
+</html>

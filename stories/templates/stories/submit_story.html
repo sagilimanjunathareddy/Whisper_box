@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Submit an Anonymous Story</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <!-- ✅ Add your evidence upload input here -->
+    <label for="evidence_files"><strong>Attach Proof / Evidence</strong></label><br>
+    <input type="file" 
+           name="evidence_files" 
+           id="evidence_files" 
+           multiple 
+           accept="image/*,application/pdf">
+    
+    <!-- Preview box (optional, but helpful) -->
+    <div id="preview" 
+         style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+    </div>
+
+    <button type="submit" class="btn" style="margin-top:14px;">Submit Story</button>
+</form>
+
+<script>
+    // Shows preview of uploaded images
+    document.getElementById('evidence_files').addEventListener('change', function(e){
+        const preview = document.getElementById('preview');
+        preview.innerHTML = '';
+
+        Array.from(e.target.files).forEach(file => {
+            // Preview only images
+            if (file.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onload = function(ev){
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    img.style.width = "150px";
+                    img.style.height = "150px";
+                    img.style.objectFit = "cover";
+                    img.style.borderRadius = "8px";
+                    img.style.border = "1px solid #ccc";
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                const box = document.createElement('div');
+                box.textContent = file.name;
+                box.style.padding = "8px";
+                box.style.border = "1px solid #ccc";
+                box.style.borderRadius = "6px";
+                preview.appendChild(box);
+            }
+        });
+    });
+</script>
+
+{% endblock %}

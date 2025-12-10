@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Analytics</h1>
+
+<section>
+  <h3>Counts by Category</h3>
+  <ul>
+    {% for c in category_counts %}
+      <li>{{ c.category }} — {{ c.count }}</li>
+    {% empty %}
+      <li>No data</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section>
+  <h3>Top Cities</h3>
+  <ul>
+    {% for c in by_city %}
+      <li>{{ c.city|default:"Unknown" }} — {{ c.count }}</li>
+    {% empty %}
+      <li>No data</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<p><a href="{% url 'admin_dashboard:index' %}">&larr; Back to dashboard</a></p>
+{% endblock %}

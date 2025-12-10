@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load tz %}
+{% block content %}
+
+<style>
+/* Modern Admin Dashboard Styling */
+.admin-wrapper {
+    max-width: 1100px;
+    margin: 25px auto;
+    padding: 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+.dashboard-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    flex: 1;
+    min-width: 280px;
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+}
+
+.card h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.stat-number {
+    font-size: 40px;
+    font-weight: 700;
+    margin-top: 8px;
+    color: #0d6efd;
+}
+
+/* Category badge color codes */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+}
+
+.badge-stalking { background: #d63384; }
+.badge-eve_teasing { background: #fd7e14; }
+.badge-cyber { background: #20c997; }
+.badge-workplace { background: #0dcaf0; }
+.badge-abuse { background: #dc3545; }
+
+/* Recent list styling */
+.recent-box {
+    margin-top: 35px;
+}
+
+.recent-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.recent-item {
+    padding: 12px;
+    background: #fff;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: 0.15s;
+
+}
+
+.recent-item:hover {
+    background: #f8f9fa;
+    background: #eef2ff;
+    transform: translateX(4px);
+}
+
+.city {
+    font-weight: 600;
+    color: #444;
+    width: 160px;
+}
+
+.time {
+    margin-left: auto;
+    font-size: 13px;
+    color: #777;
+}
+
+/* Quick action buttons */
+.action-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: #0d6efd;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.action-btn:hover {
+    background: #0b5ed7;
+}
+</style>
+
+<div class="admin-wrapper">
+    <h1 class="dashboard-title">🌐 Admin Dashboard</h1>
+
+    <!-- Stats Section -->
+    <div class="card-grid">
+
+        <!-- Total Stories -->
+        <div class="card">
+            <h3>Total Stories</h3>
+            <div class="stat-number">{{ total_stories }}</div>
+        </div>
+
+        <!-- Category stats -->
+        <div class="card">
+            <h3>Stories by Category</h3>
+            {% if category_counts %}
+                {% for c in category_counts %}
+                    <div style="margin-bottom: 8px;">
+                        <span class="badge badge-{{ c.category }}">{{ c.category }}</span>
+                        — <strong>{{ c.count }}</strong>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No stories yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Quick actions -->
+        <div class="card">
+            <h3>Quick Actions</h3>
+            <a class="action-btn" href="{% url 'admin:index' %}">Open Django Admin</a><br>
+            <a class="action-btn" href="{% url 'admin_dashboard:analytics' %}">View Analytics</a>
+        </div>
+
+    </div>
+
+    <!-- Recent Stories Section -->
+    <div class="recent-box">
+        <h2 class="recent-title">📌 Recent Stories</h2>
+
+        {% for s in recent_stories %}
+            <a href="{% url 'stories:story_detail' s.id %}" class="recent-item" style="text-decoration:none; color:inherit;">
+               <span class="badge badge-{{ s.category }}">{{ s.category }}</span>
+               <span class="city">{{ s.city|default:"Unknown" }}</span>
+               <span class="time">{{ s.created_at|localtime|date:"M d, Y — g:i A" }}</span>
+            </a>
+
+        {% empty %}
+            <p>No recent stories found.</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}

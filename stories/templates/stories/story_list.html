@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Whisper Stories</h2>
+<form method="get">
+  <input type="text" name="q" placeholder="Search stories...">
+  <button type="submit">Search</button>
+</form>
+
+<a href="{% url 'stories:submit_story' %}">Submit your story</a>
+
+<div class="stories-grid">
+  {% for story in stories %}
+    <div class="story-card">
+      <h3>{{ story.title|default:'Untitled' }}</h3>
+      <p>{{ story.description|truncatechars:200 }}</p>
+      <small>{{ story.category }} • {{ story.city }}</small>
+      <p><a href="{% url 'stories:story_detail' story.pk %}">Read more</a></p>
+    </div>
+  {% empty %}
+    <p>No stories yet.</p>
+  {% endfor %}
+</div>
+
+<div class="pagination">
+  {% if stories.has_previous %}
+    <a href="?page={{ stories.previous_page_number }}">Previous</a>
+  {% endif %}
+  <span>Page {{ stories.number }} of {{ stories.paginator.num_pages }}</span>
+  {% if stories.has_next %}
+    <a href="?page={{ stories.next_page_number }}">Next</a>
+  {% endif %}
+</div>
+{% endblock %}

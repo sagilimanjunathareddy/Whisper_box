@@ -1,0 +1,20 @@
+<div class="comments">
+  <h3>Support / Comments</h3>
+  <form action="{% url 'comments:add_comment' story.id %}" method="post">
+    {% csrf_token %}
+    <textarea name="text" rows="3" placeholder="Leave a supportive comment (anonymous)"></textarea>
+    <br>
+    <button type="submit">Post</button>
+  </form>
+
+  <div class="comment-list">
+    {% for comment in story.comments.all %}
+      <div class="comment-card">
+        <p>{{ comment.text }}</p>
+        <small>{{ comment.created_at }}</small>
+      </div>
+    {% empty %}
+      <p>No comments yet.</p>
+    {% endfor %}
+  </div>
+</div>

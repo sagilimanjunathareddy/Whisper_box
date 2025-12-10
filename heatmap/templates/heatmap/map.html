@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Unsafe Area Heatmap</h2>
+<p id="heatmap-info" style="margin-top:8px; color:#555;"></p>
+<div id="map" style="height:600px; width:100%; border-radius:10px; margin-top:12px;"></div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- Leaflet heat plugin -->
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+<script>
+  // safe parsing of JSON from Django
+  const points = JSON.parse('{{ points_json|escapejs }}');
+
+  console.info("Heatmap: points.length =", points.length);
+  const infoEl = document.getElementById('heatmap-info');
+  if (!points || points.length === 0) {
+    infoEl.innerText = "No user-reported coordinates found. Add stories with 'lat,lng' in location to populate the map.";
+  } else {
+    infoEl.innerText = "Showing user-reported unsafe areas (heatmap + markers). Click a marker for details.";
+  }
+
+  // Initialize map
+  const map = L.map('map', {preferCanvas: true}).setView([20.5937, 78.9629], 5);
+
+  // Base tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Build heatData and markers
+  const heatData = [];      // format: [lat, lng, intensity]
+  const markersLayer = L.layerGroup(); // for markers
+
+  points.forEach(p => {
+    // intensity: you can compute based on details; for now use 0.6
+    const intensity = 0.6;
+
+    heatData.push([p.lat, p.lng, intensity]);
+
+    // marker (circle marker for aesthetics)
+    const marker = L.circleMarker([p.lat, p.lng], {
+      radius: 8,
+      weight: 1,
+      fillOpacity: 0.9
+    });
+
+    const titleEsc = (p.title || 'Unsafe area').replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const popupHtml = `<strong>${titleEsc}</strong><br/>Category: ${p.category || 'N/A'}`;
+    marker.bindPopup(popupHtml);
+    markersLayer.addLayer(marker);
+  });
+
+  // Add heat layer if we have points
+  if (heatData.length > 0) {
+    const heat = L.heatLayer(heatData, {
+      radius: 30,   // larger = wider blobs
+      blur: 25,
+      maxZoom: 17,
+      max: 1.0
+    }).addTo(map);
+
+    // Add markers on top
+    markersLayer.addTo(map);
+
+    // Fit map to show all points
+    const latlngs = points.map(p => [p.lat, p.lng]);
+    try {
+      map.fitBounds(latlngs, {padding: [40,40]});
+    } catch (e) {
+      console.warn("fitBounds failed; using default center", e);
+      map.setView([20.5937, 78.9629], 5);
+    }
+  } else {
+    // No points: center on country (or show example marker)
+    map.setView([20.5937, 78.9629], 5);
+
+    // OPTIONAL: show an example marker so you can verify visually — comment out for production
+    const exMarker = L.circleMarker([28.6139, 77.2090], {radius:8}).addTo(map);
+    exMarker.bindPopup("<strong>Example: add real points to populate heatmap</strong>");
+  }
+
+  // Optional: add simple layer control to toggle markers on/off
+  const overlayMaps = {
+    "Markers": markersLayer
+  };
+  L.control.layers(null, overlayMaps, {collapsed: false, position: 'topright'}).addTo(map);
+</script>
+{% endblock %}
